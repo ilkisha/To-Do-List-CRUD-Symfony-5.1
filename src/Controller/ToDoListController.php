@@ -2,7 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\Task;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
 class ToDoListController extends AbstractController
@@ -17,10 +20,23 @@ class ToDoListController extends AbstractController
 
     /**
      * @Route("/create", name="create_task", methods={"POST"})
+     * @param Request $request
+     * @return RedirectResponse
      */
-    public function create()
+    public function create(Request $request): RedirectResponse
     {
-        exit('to do: create a new task!');
+        $title = trim($request->request->get('title'));
+        if(empty($title)){
+            return $this->redirectToRoute('to_do_list');
+        }
+
+        $entityManager = $this->getDoctrine()->getManager();
+        $task = new Task();
+        $task->setTitle($title);
+        $entityManager->persist($task);
+        $entityManager->flush();
+
+        return $this->redirectToRoute('to_do_list');
     }
 
     /**
@@ -36,7 +52,7 @@ class ToDoListController extends AbstractController
      * @Route("/delete/{id}", name="task_delete")
      * @param int $id
      */
-    public function delte(int $id): void
+    public function delete(int $id): void
     {
         exit('to do: Delete a task with the id of ' . $id);
     }
